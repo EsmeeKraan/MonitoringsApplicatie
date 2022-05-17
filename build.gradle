@@ -1,9 +1,18 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
 plugins {
     id 'java'
 }
 
 group 'me.ictmo1'
-version '1.0-SNAPSHOT'
+version 'esmé'
 
 repositories {
     mavenCentral()
@@ -22,7 +31,29 @@ test {
 jar {
     manifest {
         attributes(
-                'Main-Class': 'me.ictmo1.MonitorClient'
+                'Main-Class': 'me.ictmo1.MonitorGUI'
         )
     }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'me.ictmo1.MomitorGUI'
+    }
+    archiveClassifier = "all"
+    duplicatesStrategy "exclude"
+    from {
+//        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
