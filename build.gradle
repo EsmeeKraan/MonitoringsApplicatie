@@ -42,7 +42,7 @@ jar {
 
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'me.ictmo1.MomitorGUI'
+        attributes 'Main-Class': 'me.ictmo1.MonitorGUI'
     }
     archiveClassifier = "all"
     duplicatesStrategy "exclude"
