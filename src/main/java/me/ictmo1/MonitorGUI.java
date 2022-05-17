@@ -5,7 +5,10 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -20,6 +23,8 @@ public class MonitorGUI {
     static JProgressBar procesbelastingProgressBar = new JProgressBar();
     static JProgressBar beschikbaarheidProgressBar = new JProgressBar();
     static JProgressBar diskUsageProgressBar = new JProgressBar();
+
+    static ServerSocket serverSocket = null;
 
 
     public static void main(String[] args) {
@@ -70,7 +75,7 @@ public class MonitorGUI {
 
         new Thread(() -> {
             try {
-                ServerSocket serverSocket = new ServerSocket(6969);
+                serverSocket = new ServerSocket(6969);
                 while (true) {
                     handleClient(serverSocket.accept());
                 }
@@ -80,6 +85,19 @@ public class MonitorGUI {
                 JOptionPane.showMessageDialog(frame, "Er is een fout opgetreden!");
             }
         }).start();
+
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent ev){
+                if(serverSocket != null){
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.exit(0);
+            }
+        });
 
         new Thread(() -> {
             int totalTicks = 0;
