@@ -31,7 +31,7 @@ test {
 jar {
     manifest {
         attributes(
-                'Main-Class': 'me.ictmo1.MonitorGUI'
+                'Main-Class': 'me.ictmo1.MonitorClient'
         )
     }
 
