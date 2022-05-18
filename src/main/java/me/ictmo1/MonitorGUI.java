@@ -11,6 +11,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
@@ -25,6 +27,11 @@ public class MonitorGUI {
     static JProgressBar diskUsageProgressBar = new JProgressBar();
 
     static ServerSocket serverSocket = null;
+
+    static JTextField UptimeField = new JTextField(3);
+    static JTextField DowntimeField = new JTextField(3);
+
+    static Instant eersteVerbindingstijd = null;
 
 
     public static void main(String[] args) {
@@ -50,7 +57,12 @@ public class MonitorGUI {
         frame.add(beschikbaarheidProgressBar, "skip 1");
 
         frame.add(new JLabel("Uptime"), "skip 3");
-        frame.add(new JTextField(3), "wrap");
+        frame.add(UptimeField, "wrap");
+
+        frame.add(diskUsageProgressBar, "skip 2");
+
+        frame.add(new JLabel("Downtime"), "skip 3");
+        frame.add(DowntimeField, "wrap");
 
 
         diskUsageProgressBar.setStringPainted(true);
@@ -68,9 +80,6 @@ public class MonitorGUI {
 //                }
 //            }
 //        }).start();
-
-
-        frame.add(diskUsageProgressBar, "skip 2");
 
 
         new Thread(() -> {
@@ -103,14 +112,24 @@ public class MonitorGUI {
             int totalTicks = 0;
             int ticksAlive = 0;
 
+            Instant laatsteUpdate = null;
+
             while(true){
+                boolean wasOnline = false;
                 if(!serverTime.isEmpty()){
                     long time = serverTime.values().iterator().next();
                     long delta = System.currentTimeMillis() - time;
 
                     if(delta < 3000){
                         ticksAlive++;
+                        wasOnline = true;
+                        laatsteUpdate = Instant.now();
                     }
+                }
+                if(!wasOnline && laatsteUpdate != null){
+                    DowntimeField.setText((Duration.between(laatsteUpdate, Instant.now())).getSeconds()+" seconden");
+                } else {
+                    DowntimeField.setText("");
                 }
 
                 totalTicks++;
@@ -118,6 +137,11 @@ public class MonitorGUI {
                 beschikbaarheidProgressBar.setValue((int) beschikbaarheid);
 
                 beschikbaarheidProgressBar.setString("Beschikbaarheid " + String.format("%.2f", beschikbaarheid) + " %");
+
+                if(eersteVerbindingstijd != null && wasOnline){
+                    UptimeField.setText((Duration.between(eersteVerbindingstijd, Instant.now())).getSeconds()+" seconden");
+                }
+
 
                 try {
                     Thread.sleep(1000);
@@ -134,6 +158,8 @@ public class MonitorGUI {
 
     public static void handleClient(Socket socket) {
         serverTime.put(socket, System.currentTimeMillis());
+
+        eersteVerbindingstijd = Instant.now();
 
         try {
             var input = new Scanner(new BufferedInputStream(socket.getInputStream()));
