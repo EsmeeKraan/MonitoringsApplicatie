@@ -33,6 +33,8 @@ public class MonitorGUI {
 
     static Instant eersteVerbindingstijd = null;
 
+    static JCheckBox beschikbaarheidsCheck = new JCheckBox();
+
 
     public static void main(String[] args) {
 
@@ -42,7 +44,7 @@ public class MonitorGUI {
         frame.setLayout(new MigLayout("", "[grow,fill]"));
 
         frame.add(new JLabel("Beschikbaar"));
-        frame.add(new JCheckBox());
+        frame.add(beschikbaarheidsCheck);
 
         procesbelastingProgressBar.setStringPainted(true);
         procesbelastingProgressBar.setMaximum(100);
@@ -54,12 +56,12 @@ public class MonitorGUI {
         beschikbaarheidProgressBar.setStringPainted(true);
         beschikbaarheidProgressBar.setMaximum(100);
 
-        frame.add(beschikbaarheidProgressBar, "skip 1");
+        frame.add(diskUsageProgressBar, "skip 1");
 
         frame.add(new JLabel("Uptime"), "skip 3");
         frame.add(UptimeField, "wrap");
 
-        frame.add(diskUsageProgressBar, "skip 2");
+        frame.add(beschikbaarheidProgressBar, "skip 2");
 
         frame.add(new JLabel("Downtime"), "skip 3");
         frame.add(DowntimeField, "wrap");
@@ -128,6 +130,7 @@ public class MonitorGUI {
                 }
                 if(!wasOnline && laatsteUpdate != null){
                     DowntimeField.setText((Duration.between(laatsteUpdate, Instant.now())).getSeconds()+" seconden");
+                    beschikbaarheidsCheck.setSelected(false);
                 } else {
                     DowntimeField.setText("");
                 }
@@ -177,6 +180,8 @@ public class MonitorGUI {
                 }
                 double processorbelasting = (Double.parseDouble(parts[0])*100);
                 double diskUsage = (Double.parseDouble(parts[1])*100);
+
+                beschikbaarheidsCheck.setSelected(true);
 
                 procesbelastingProgressBar.setValue((int) processorbelasting);
                 procesbelastingProgressBar.setString("Procesbelasting " + String.format("%.2f", processorbelasting) + " %");
