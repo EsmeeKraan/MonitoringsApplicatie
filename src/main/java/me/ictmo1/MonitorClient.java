@@ -16,6 +16,7 @@ import java.util.Scanner;
 public class MonitorClient {
 
     public static void main(String[] args) throws Exception {
+        System.out.println("Verbinden met: 192.168.10.21");
         Socket socket = new Socket("192.168.10.21", 6969);
         var output = socket.getOutputStream();
         OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
